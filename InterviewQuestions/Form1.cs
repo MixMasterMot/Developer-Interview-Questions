@@ -113,8 +113,10 @@ namespace InterviewQuestions
                 List<TreeNode> childNodes = new List<TreeNode>();
                 foreach(string subAns in splitAns)
                 {
+                    string tmpAns = subAns.TrimStart('\n','\r');
+                    tmpAns = tmpAns.Trim();
                     if (string.IsNullOrWhiteSpace(subAns)) { continue; }
-                    TreeNode childe = new TreeNode(subAns);
+                    TreeNode childe = new TreeNode(tmpAns);
                     childNodes.Add(childe);
                 }
                 TreeNode parent = new TreeNode(quest.getQuestion(), childNodes.ToArray());

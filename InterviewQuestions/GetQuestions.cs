@@ -22,42 +22,74 @@ namespace InterviewQuestions
 
         private void tmpGetQuest()
         {
-            List<Question> questions = new List<Question>();
-
-            //HtmlWeb web = new HtmlWeb();
-            //HtmlDocument document = web.Load(URL);
-
+            HtmlWeb web = new HtmlWeb();
             var document = new HtmlDocument();
-            document.Load(@"C:\Users\Administrator\Desktop\New Text Document (2).html");
+            document.Load(@"C:\Users\Administrator\Desktop\New Text Document (3).html");
+            List<HtmlNode> data1 = document.DocumentNode.SelectNodes("//div[@class='post-excerpt']//td").ToList();
 
-            HtmlNode[] data = document.DocumentNode.SelectNodes("//div[@class='post-excerpt']//td").ToArray();
 
-            for (int i = 0; i < data.Length; i = i + 5)
+            //tst1(document);
+            List<HtmlNode> data = getNodes(document);
+
+            List<string> points = new List<string>();
+
+            for (int i = 0; i < data.Count - 1; i++)
             {
-                string quest = formatText(data[i]);
-                string ans = formatText(data[i + 1]);
+                string tst = formatText(data[i]);
+                if (!string.IsNullOrWhiteSpace(tst))
+                {
+                    points.Add(tst);
+                }
+            }
+
+            List<Question> questions = new List<Question>();
+            for(int i = 0; i<points.Count; i = i + 2)
+            {
+                string quest = points[i];
+                string ans = points[i + 1];
                 Question q = new Question(quest, ans);
                 questions.Add(q);
             }
 
             SQLdata dat = new SQLdata();
-            dat.checkAndUpdateData("tst", questions);
+            dat.checkAndUpdateData("TST3", questions);
         }
 
         private void getQuestions(Dictionary<string, List<string>> URLDict)
         {
             SQLdata dat = new SQLdata();
-            foreach(KeyValuePair<string,List<string>> pair in URLDict)
+            foreach (KeyValuePair<string, List<string>> pair in URLDict)
             {
                 string topic = pair.Key;
                 List<Question> questions = new List<Question>();
                 foreach (string URL in pair.Value)
                 {
                     questions.AddRange(ParseURL(URL));
-                    Thread.Sleep(600);
+                    Thread.Sleep(800);
                 }
                 dat.checkAndUpdateData(topic, questions);
             }
+        }
+
+        private List<HtmlNode> getNodes(HtmlDocument document)
+        {
+            var divs = document.DocumentNode.SelectNodes("//div");
+            if (divs != null)
+            {
+                foreach (var tag in divs)
+                {
+                    if (tag.Attributes["class"] != null && string.Compare(tag.Attributes["class"].Value, "fourm", StringComparison.InvariantCultureIgnoreCase) == 0)
+                    {
+                        tag.Remove();
+                    }
+                    else if (tag.Attributes["id"] != null && string.Compare(tag.Attributes["id"].Value, "fourm", StringComparison.InvariantCultureIgnoreCase) == 0)
+                    {
+                        tag.Remove();
+                    }
+                }
+            }
+            List<HtmlNode> data1 = document.DocumentNode.SelectNodes("//div[@class='post-excerpt']//td").ToList();
+            return data1;
         }
 
         private List<Question> ParseURL(string URL)
@@ -65,16 +97,26 @@ namespace InterviewQuestions
             List<Question> questions = new List<Question>();
             HtmlWeb web = new HtmlWeb();
             HtmlDocument document = web.Load(URL);
-            //HtmlNode[] questions = document.DocumentNode.SelectNodes("//div[@class='post-excerpt']//td").ToArray();
-            HtmlNode[] data = document.DocumentNode.SelectNodes("//div[@class='post-excerpt']//td").ToArray();
+            List<HtmlNode> data = getNodes(document);
+            List<string> points = new List<string>();
 
-            for(int i = 0; i<data.Length; i = i + 5)
+            for (int i = 0; i < data.Count - 1; i++)
             {
-                string quest = formatText(data[i]);
-                string ans = formatText(data[i+1]);
+                string tst = formatText(data[i]);
+                if (!string.IsNullOrWhiteSpace(tst))
+                {
+                    points.Add(tst);
+                }
+            }
+
+            for(int i = 0; i < points.Count - 1; i = i + 2)
+            {
+                string quest = points[i];
+                string ans = points[i + 1];
                 Question q = new Question(quest, ans);
                 questions.Add(q);
             }
+
             return questions;
         }
 
